@@ -53,10 +53,10 @@ rpnCalc(["cos" | OperationTail], [Num1 | StackTail]) ->
   rpnCalc(OperationTail, [math:cos(Num1) | StackTail]);
 
 rpnCalc([Digits | OperationTail], Stack) ->
-  rpnCalc(OperationTail, [string_to_number(Digits) | Stack]).
+  rpnCalc(OperationTail, [stringToNumber(Digits) | Stack]).
 
 
-string_to_number(Str) ->
+stringToNumber(Str) ->
   case string:to_float(Str) of
     {error, no_float} -> list_to_integer(Str);
     {Float , _Rest} -> Float
