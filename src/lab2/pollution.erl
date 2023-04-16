@@ -9,6 +9,7 @@
 -record(monitor, {name_map, coordinate_map}).
 -record(station, {name, coordinates, readings=[]}).
 -record(reading, {type, value, date_time}).
+
 %% Monitor: Record(
 %%     name_map: Map(Key: String, Value: Station),
 %%     coordinate_map: Map(Key: {Float, Float}, Value: Station)
@@ -94,7 +95,10 @@ add_value(Station_id, Date_time, Reading_type, Reading_value, Monitor) ->
   Station = get_station(Station_id, Monitor),
   Updated_readings_list = Station#station.readings ++ [New_reading],
 
-  update_station_readings(Station_id, Updated_readings_list, Monitor).
+  case get_one_value(Station_id, Date_time, Reading_type, Monitor) of
+    none -> update_station_readings(Station_id, Updated_readings_list, Monitor);
+    _ -> error
+  end.
 
 
 remove_value(Station_id, Reading_date_time, Reading_type, Monitor) ->
@@ -106,14 +110,22 @@ remove_value(Station_id, Reading_date_time, Reading_type, Monitor) ->
   update_station_readings(Station_id, Updated_readings_list, Monitor).
 
 
-get_one_value(Station_id, Reading_type, Reading_date_time, Monitor) ->
+
+get_one_value(Station_id, Reading_date_time, Reading_type, Monitor) ->
   Station = get_station(Station_id, Monitor),
   Station_readings_list = Station#station.readings,
-  [Reading | _] = lists:filter(
+
+  Readings_matching = lists:filter(
     fun(R) -> (R#reading.type == Reading_type) and (R#reading.date_time == Reading_date_time) end,
     Station_readings_list
   ),
-  Reading#reading.value.
+  case length(Readings_matching) of
+    0 -> none;
+    1 ->
+      [Reading] = Readings_matching,
+      Reading#reading.value;
+    _ -> error
+  end.
 
 
 get_station_mean(Station_id, Reading_type, Monitor) ->
