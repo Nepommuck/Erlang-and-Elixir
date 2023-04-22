@@ -25,16 +25,21 @@
 %% "Private":
 get_station(Station_id, Monitor) ->
   Station = case Station_id of
-              [_ | _] -> maps:get(Station_id, Monitor#monitor.name_map);
-              {_, _} -> maps:get(Station_id, Monitor#monitor.coordinate_map);
-              _ -> none
+              [_ | _] -> case maps:is_key(Station_id, Monitor#monitor.name_map) of
+                           true -> maps:get(Station_id, Monitor#monitor.name_map);
+                           false -> {error, no_such_station_name}
+                         end;
+              {_, _} -> case maps:is_key(Station_id, Monitor#monitor.coordinate_map) of
+                          true -> maps:get(Station_id, Monitor#monitor.coordinate_map);
+                          false -> {error, no_such_coordinates}
+                        end
             end,
   Station.
 
 
 get_station_name_and_coordinates(Station_id, Monitor) ->
   case get_station(Station_id, Monitor) of
-    none -> none;
+    {error, _} -> {error, station_not_found};
     Station -> {Station#station.name, Station#station.coordinates}
   end.
 
@@ -60,7 +65,7 @@ get_standard_deviation(Station, Reading_type) ->
   Deltas = Get_delta(lists:map(fun(R) -> R#reading.value end, Readings_of_type)),
 
   case length(Deltas) of
-    0 -> none;
+    0 -> {error, no_such_readings};
     1 -> 0;
     Length ->
       Mean = lists:sum(Deltas) / Length,
@@ -80,7 +85,7 @@ add_station(Name, Coordinates, Monitor) ->
     and not maps:is_key(Coordinates, Monitor#monitor.coordinate_map),
 
   case Is_id_unique of
-    false -> error;
+    false -> {error, station_is_not_unique};
     true -> #monitor{
       name_map = maps:put(Name,
         #station{name = Name, coordinates = Coordinates}, Monitor#monitor.name_map),
@@ -93,52 +98,70 @@ add_station(Name, Coordinates, Monitor) ->
 add_value(Station_id, Date_time, Reading_type, Reading_value, Monitor) ->
   New_reading = #reading{type = Reading_type, value = Reading_value, date_time = Date_time},
   Station = get_station(Station_id, Monitor),
-  Updated_readings_list = Station#station.readings ++ [New_reading],
 
-  case get_one_value(Station_id, Date_time, Reading_type, Monitor) of
-    none -> update_station_readings(Station_id, Updated_readings_list, Monitor);
-    _ -> error
+  case Station of
+    {error, _} -> {error, no_station_with_such_id};
+    _ ->
+      Updated_readings_list = Station#station.readings ++ [New_reading],
+      case get_one_value(Station_id, Date_time, Reading_type, Monitor) of
+        {error, _} -> update_station_readings(Station_id, Updated_readings_list, Monitor);
+        _ -> {error, such_value_already_exists}
+      end
   end.
 
 
 remove_value(Station_id, Reading_date_time, Reading_type, Monitor) ->
   Station = get_station(Station_id, Monitor),
-  Updated_readings_list = lists:filter(
-    fun(R) -> (R#reading.type /= Reading_type) or (R#reading.date_time /= Reading_date_time) end,
-    Station#station.readings
-  ),
-  update_station_readings(Station_id, Updated_readings_list, Monitor).
 
+  case Station of
+    {error, _} -> {error, no_station_with_such_id};
+    _ ->
+      Updated_readings_list = lists:filter(
+        fun(R) -> (R#reading.type /= Reading_type) or (R#reading.date_time /= Reading_date_time) end,
+        Station#station.readings
+      ),
+      case get_one_value(Station_id, Reading_date_time, Reading_type, Monitor) of
+        {error, _} -> {error, value_doesnt_exist};
+        _ -> update_station_readings(Station_id, Updated_readings_list, Monitor)
+      end
+  end.
 
 
 get_one_value(Station_id, Reading_date_time, Reading_type, Monitor) ->
   Station = get_station(Station_id, Monitor),
-  Station_readings_list = Station#station.readings,
-
-  Readings_matching = lists:filter(
-    fun(R) -> (R#reading.type == Reading_type) and (R#reading.date_time == Reading_date_time) end,
-    Station_readings_list
-  ),
-  case length(Readings_matching) of
-    0 -> none;
-    1 ->
-      [Reading] = Readings_matching,
-      Reading#reading.value;
-    _ -> error
+  case Station of
+    {error, _} -> {error, no_such_station};
+    _ ->
+      Station_readings_list = Station#station.readings,
+      Readings_matching = lists:filter(
+        fun(R) -> (R#reading.type == Reading_type) and (R#reading.date_time == Reading_date_time) end,
+        Station_readings_list
+      ),
+      case length(Readings_matching) of
+        0 -> {error, no_such_value};
+        1 ->
+          [Reading] = Readings_matching,
+          Reading#reading.value;
+        _ -> {error, multiple_values_found}
+      end
   end.
 
 
 get_station_mean(Station_id, Reading_type, Monitor) ->
   Station = get_station(Station_id, Monitor),
-  Readings_of_type = lists:filter(
-    fun(R) -> (R#reading.type == Reading_type) end,
-    Station#station.readings
-  ),
-  case length(Readings_of_type) of
-    0 -> none;
-    Length -> lists:foldl(
-      fun(R, Sum) -> Sum + R#reading.value end, 0, Readings_of_type
-    ) / Length
+  case Station of
+    {error, _} -> {error, no_such_station};
+    _ ->
+      Readings_of_type = lists:filter(
+        fun(R) -> (R#reading.type == Reading_type) end,
+        Station#station.readings
+      ),
+      case length(Readings_of_type) of
+        0 -> {error, no_such_readings};
+        Length -> lists:foldl(
+          fun(R, Sum) -> Sum + R#reading.value end, 0, Readings_of_type
+        ) / Length
+      end
   end.
 
 
@@ -147,14 +170,14 @@ get_daily_mean(Reading_type, Date, Monitor) ->
                        F([]) -> [];
                        F([Station | Tail]) -> Station#station.readings ++ F(Tail)
                      end,
-  DateTime_Into_Date = fun({Date_, _T}) -> Date_ end,
+  Fun_DateTime_Into_Date = fun({Date_, _T}) -> Date_ end,
 
   Day_readings = lists:filter(
-    fun(R) -> (R#reading.type == Reading_type) and (DateTime_Into_Date(R#reading.date_time) == Date) end,
+    fun(R) -> (R#reading.type == Reading_type) and (Fun_DateTime_Into_Date(R#reading.date_time) == Date) end,
     Get_all_readings(maps:values(Monitor#monitor.name_map))
   ),
   case length(Day_readings) of
-    0 -> none;
+    0 -> {error, no_such_readings_this_day};
     Length -> lists:foldl(
       fun(R, Sum) -> Sum + R#reading.value end, 0, Day_readings
     ) / Length
@@ -169,24 +192,10 @@ get_correlation(Station_id, Reading_type1, Reading_type2, Monitor) ->
   }.
 
 
-%%%% DATA:
-%%P = pollution:create_monitor().
-%%P1 = pollution:add_station("Aleja Slowackiego", {50.0730, 19.9327}, P).
-%%P2 = pollution:add_station("Zakopianka", {50.0062, 19.9244}, P1).
-%%{Day, _} = calendar:local_time().
-%%P3 = pollution:add_value({50.0730, 19.9327}, calendar:local_time(), "PM10", 59, P2).
-%%P4 = pollution:add_value("Aleja Slowackiego", calendar:local_time(), "PM2,5", 113, P3).
-%%P5 = pollution:add_value({50.0730, 19.9327}, {Day, {23,17,1}}, "PM10", 70, P4).
-%%P6 = pollution:add_value("Aleja Slowackiego", {{2005,4,2},{21,37,00}}, "PM2,5", 420, P5).
-%%P7 = pollution:add_value("Zakopianka", calendar:local_time(), "PM10", 111, P6).
+%% Run tests:
 %%
-%%%% TESTS:
-%%pollution:get_station_mean("Aleja Slowackiego", "PM2,5", P7).
-%%%% Output: 266.5
-%%
-%%P8 = pollution:remove_value("Aleja Slowackiego", {{2005,4,2},{21,37,00}}, "PM2,5", P7).
-%%pollution:get_station_mean("Aleja Slowackiego", "PM2,5", P8).
-%%%% Output: 113.0
-%%
-%%pollution:get_daily_mean("PM10", Day, P8).
-%%%% Output: 80.0
+%% $ cd ./src/lab2
+%% $ erl
+%% $ c(pollution).
+%% $ c(pollution_test).
+%% $ eunit:test([pollution_test]).
