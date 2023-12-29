@@ -1,0 +1,418 @@
+<div id="page">
+    <h2 class="sectionedit1" id="laboratorium_nr_6_-_aplikacja_bazodanowa_elixir_ecto">Laboratorium nr 6 - Aplikacja bazodanowa Elixir Ecto</h2>
+    <div class="level2">
+    
+    <p>
+    <br>
+    
+    </p>
+    <hr>
+    
+    <p>
+    <br>
+    
+    </p>
+    
+    </div>
+    
+    <h4 id="przed_zajeciami_prosze_o">Przed zajęciami proszę o:</h4>
+    <div class="level4">
+    <ol>
+    <li class="level1"><div class="li"> utworzenie konta w serwisie replit: <a href="https://replit.com/" class="urlextern" title="https://replit.com/" rel="ugc nofollow">https://replit.com/</a></div>
+    </li>
+    <li class="level1"><div class="li"> utworzenie w nim nowego Repla dla języka Elixir, nazwanie go w formacie „Imię Nazwisko Elixir lab6” </div>
+    </li>
+    <li class="level1"><div class="li"> przetestowanie jego działania</div>
+    </li>
+    <li class="level1"><div class="li"> udostępnienie Repla przez „Private join link” i wpisanie linku do niego w <a href="https://forms.gle/yC4z1uS5huKJNQC5A" class="urlextern" title="https://forms.gle/yC4z1uS5huKJNQC5A" rel="ugc nofollow">https://forms.gle/yC4z1uS5huKJNQC5A</a></div>
+    </li>
+    </ol>
+    
+    <p>
+    <br>
+    
+    </p>
+    
+    </div>
+    
+    <h4 id="cele_cwiczenia">Cele ćwiczenia</h4>
+    <div class="level4">
+    <ol>
+    <li class="level1"><div class="li"> Zapoznanie z działaniem <em>mix</em>, </div>
+    </li>
+    <li class="level1"><div class="li"> Poznanie założeń Ecto,</div>
+    </li>
+    <li class="level1"><div class="li"> Zbudowanie aplikacji bazodanowej w Elixirze. </div>
+    </li>
+    </ol>
+    
+    <p>
+    <br>
+    
+    </p>
+    
+    </div>
+    
+    <h4 id="przebieg_zajec">Przebieg zajęć</h4>
+    <div class="level4">
+    
+    <p>
+    <br>
+    
+    </p>
+    
+    </div>
+    
+    <h5 id="utworzenie_aplikacji">Utworzenie aplikacji</h5>
+    <div class="level5">
+    
+    <p>
+    <br>
+    
+    </p>
+    <ol>
+    <li class="level1"><div class="li"> wejdź do zakładki Shell, wpisz<pre class="code erlang">        mix new pollutiondb <span class="sy3">--</span>sup</pre>
+    </div>
+    </li>
+    <li class="level1"><div class="li"> przejdź do katalogu <em>pollutiondb</em> i w nim wywołaj <em>mix compile</em> </div>
+    </li>
+    <li class="level1"><div class="li"> możesz teraz wystartować <em>iex -S mix</em>, a w nim <em>:observer.start()</em> </div>
+    </li>
+    </ol>
+    
+    <p>
+    <br>
+    
+    </p>
+    
+    </div>
+    
+    <h5 id="zaleznosci_aplikacji">Zależności aplikacji</h5>
+    <div class="level5">
+    
+    <p>
+    <br>
+    
+    </p>
+    <ol>
+    <li class="level1"><div class="li"> w pliku <em>mix.esx</em> zmień funkcję <em>deps</em> by zwracała listę zawierającą: <pre class="code erlang">        <span class="br0">{</span>:<span class="me2">ecto_sql</span><span class="sy1">,</span> <span class="st0">"~&gt; 3.0"</span><span class="br0">}</span><span class="sy1">,</span>
+            <span class="br0">{</span>:<span class="me2">ecto_sqlite3</span><span class="sy1">,</span> <span class="st0">"~&gt; 0.10"</span><span class="br0">}</span></pre>
+    </div>
+    </li>
+    <li class="level1"><div class="li"> w konsoli wpisz <em>mix deps.get</em>, musisz wyrazić zgodę na instalację Hexa</div>
+    </li>
+    <li class="level1 node"><div class="li"> w konsoli wpisz <em>mix deps.compile</em>, musisz zgodzić się na pobranie Rebara</div>
+    <ol>
+    <li class="level2"><div class="li"> kompilacja zależności chwilę potrwa… </div>
+    </li>
+    </ol>
+    </li>
+    <li class="level1"><div class="li"> w konsoli wpisz <em>mix compile</em> </div>
+    </li>
+    </ol>
+    
+    <p>
+    <br>
+    
+    </p>
+    
+    </div>
+    
+    <h5 id="elementy_bazy_danych">Elementy bazy danych</h5>
+    <div class="level5">
+    
+    <p>
+    <br>
+    
+    </p>
+    <ol>
+    <li class="level1"><div class="li"> utwórz moduł Pollutiondb.Repo, który będzie reprezentował połączenie z bazą danych: wywołaj w konsoli <em>mix ecto.gen.repo -r Pollutiondb.Repo</em></div>
+    </li>
+    <li class="level1"><div class="li"> dodaj wygenerowany moduł do nadzorowanych procesów domyślnego supervisora, zgodnie z sugestią generatora</div>
+    </li>
+    <li class="level1"><div class="li"> zmodyfikuj konfigurację połączenia, by korzystała z odpowiedniej biblioteki: w pliku <em>lib/pollutiondb/repo.ex</em> zmień adapter z <em>Ecto.Adapters.Postgres</em> na <em>Ecto.Adapters.SQLite3</em></div>
+    </li>
+    <li class="level1"><div class="li"> zmodyfikuj konfigurację połączenia z bazą danych, która została wygenerowana w pliku <em>config/config.exs</em> <pre class="code erlang">    import <span class="re5">Config</span>
+    &nbsp;
+        config :<span class="me2">pollutiondb</span><span class="sy1">,</span> ecto_rep<a href="http://erlang.org/doc/man/os.html"><span class="kw5">os</span></a>: <span class="br0">[</span><span class="re5">Pollutiondb</span><span class="sy1">.</span><span class="re5">Repo</span><span class="br0">]</span>  
+        config :<span class="me2">pollutiondb</span><span class="sy1">,</span> <span class="re5">Pollutiondb</span><span class="sy1">.</span><span class="re5">Repo</span><span class="sy1">,</span> database: <span class="st0">"database/pollutiondb.db"</span></pre>
+    </div>
+    </li>
+    <li class="level1"><div class="li"> utwórz pustą bazę danych: wpisz w shellu <em>mix ecto.create</em> </div>
+    </li>
+    </ol>
+    
+    <p>
+    <br>
+    
+    </p>
+    
+    </div>
+    
+    <h5 id="model_w_bazie_i_w_aplikacji">Model w bazie i w aplikacji</h5>
+    <div class="level5">
+    
+    <p>
+    <br>
+    
+    </p>
+    <ol>
+    <li class="level1"><div class="li"> każdą zmianę struktury bazy Ecto nazywa <em>migracją</em>. Wygeneruj pierwszą migrację, wpisując w shell polecenie <em>mix ecto.gen.migration create_stations</em> </div>
+    </li>
+    <li class="level1"><div class="li"> w wygenerowanej funkcji <em>change</em> w pliku <em>priv/repo/migrations/datenumber_create_stations.exs</em> zdefiniuj strukturę pierwszej tabeli:  <pre class="code erlang">    create <span class="re3">table</span><span class="br0">(</span>:<span class="me2">stations</span><span class="br0">)</span> do
+          add :<span class="me2">name</span><span class="sy1">,</span> :<span class="me2">string</span>
+          add :<span class="me2">lon</span><span class="sy1">,</span> :<span class="kw3">float</span>
+          add :<span class="me2">lat</span><span class="sy1">,</span> :<span class="kw3">float</span>
+        <span class="kw1">end</span></pre>
+    </div>
+    </li>
+    <li class="level1"><div class="li"> utwórz tabelę w bazie wpisując w shell <em>mix ecto.migrate</em> </div>
+    </li>
+    <li class="level1"><div class="li"> utwórz nowy moduł w pliku <em>lib/pollutiondb/station.ex</em>:<pre class="code erlang">defmodule <span class="re5">Pollutiondb</span><span class="sy1">.</span><span class="re5">Station</span> do
+      use <span class="re5">Ecto</span><span class="sy1">.</span><span class="re5">Schema</span>
+    &nbsp;
+      schema <span class="st0">"stations"</span> do
+          field :<span class="me2">name</span><span class="sy1">,</span> :<span class="me2">string</span>
+          field :<span class="me2">lon</span><span class="sy1">,</span> :<span class="kw3">float</span>
+          field :<span class="me2">lat</span><span class="sy1">,</span> :<span class="kw3">float</span>
+      <span class="kw1">end</span>
+    <span class="kw1">end</span></pre>
+    </div>
+    </li>
+    <li class="level1"><div class="li"> jeśli wszystko ma działać, schematy tabel i odpowiadających im struktur muszą być zgodne; więcej szczegółów: <a href="https://hexdocs.pm/ecto/Ecto.Schema.html" class="urlextern" title="https://hexdocs.pm/ecto/Ecto.Schema.html" rel="ugc nofollow">https://hexdocs.pm/ecto/Ecto.Schema.html</a></div>
+    </li>
+    </ol>
+    
+    <p>
+    <br>
+    
+    </p>
+    
+    </div>
+    
+    <h5 id="podstawowe_operacje_bazodanowe">Podstawowe operacje bazodanowe</h5>
+    <div class="level5">
+    
+    <p>
+    <br>
+    
+    </p>
+    <ol>
+    <li class="level1"><div class="li"> skompiluj aplikację (<em>mix compile</em>) i uruchom ją (<em>iex -S mix</em>)</div>
+    </li>
+    <li class="level1"><div class="li"> dodaj pierwszy wpis (i ew kolejne) w bazie: <pre class="code erlang">     station <span class="sy3">=</span> <span class="co1">%Pollutiondb.Station{name: "Station #1", lon: 123.4, lat: 246.8} </span>
+         <span class="re5">Pollutiondb</span><span class="sy1">.</span><span class="re5">Repo</span><span class="sy1">.</span><span class="re3">insert</span><span class="br0">(</span>station<span class="br0">)</span></pre>
+    </div>
+    </li>
+    <li class="level1"><div class="li"> sprawdź czy coś się zapisało: <pre class="code erlang">     <span class="re5">Pollutiondb</span><span class="sy1">.</span><span class="re5">Repo</span><span class="sy1">.</span><span class="re3">all</span><span class="br0">(</span><span class="re5">Pollutiondb</span><span class="sy1">.</span><span class="re5">Station</span><span class="br0">)</span></pre>
+    </div>
+    </li>
+    <li class="level1"><div class="li"> dodaj w module <em>Pollutiondb.Station</em> funkcję <em>add(station)</em> i użyj jej w aplikacji by wygenerować stacje: <pre class="code erlang">     stations <span class="sy3">=</span> <span class="br0">[</span>
+           <span class="co1">%Pollutiondb.Station{name: "s1", lon: 1.1, lat: 1.1},</span>
+           <span class="co1">%Pollutiondb.Station{name: "s2", lon: 2.1, lat: 2.1},</span>
+           <span class="co1">%Pollutiondb.Station{name: "s3", lon: 3.1, lat: 3.1},</span>
+           <span class="co1">%Pollutiondb.Station{name: "s4", lon: 4.1, lat: 4.1}</span>
+    <span class="br0">]</span></pre>
+    </div>
+    </li>
+    <li class="level1"><div class="li"> dodaj w module <em>Pollutiondb.Station</em> funkcje <em>getAll(), getById(id) i remove(station)</em> używając:<pre class="code erlang">     <span class="re5">Pollutiondb</span><span class="sy1">.</span><span class="re5">Repo</span><span class="sy1">.</span><span class="kw3">get</span><span class="br0">(</span><span class="re5">Pollutiondb</span><span class="sy1">.</span><span class="re5">Station</span><span class="sy1">,</span> id<span class="br0">)</span>  
+         <span class="re5">Pollutiondb</span><span class="sy1">.</span><span class="re5">Repo</span><span class="sy1">.</span><span class="re3">all</span><span class="br0">(</span><span class="re5">Pollutiondb</span><span class="sy1">.</span><span class="re5">Station</span><span class="br0">)</span>
+         <span class="re5">Pollutiondb</span><span class="sy1">.</span><span class="re5">Repo</span><span class="sy1">.</span><span class="re3">delete</span><span class="br0">(</span>station<span class="br0">)</span></pre>
+    </div>
+    </li>
+    <li class="level1"><div class="li"> przetestuj wszystkie w iex; warto wykonać funkcję <em>recompile</em> by nie restartować iex</div>
+    </li>
+    </ol>
+    
+    <p>
+    <br>
+    
+    </p>
+    
+    </div>
+    
+    <h5 id="wyszukiwanie_danych">Wyszukiwanie danych</h5>
+    <div class="level5">
+    
+    <p>
+    <br>
+    
+    </p>
+    <ol>
+    <li class="level1"><div class="li"> w module <em>Pollutiondb.Station</em> dodaj funkcję <em>findByName(name)</em> używając:<pre class="code erlang">     <span class="re5">Pollutiondb</span><span class="sy1">.</span><span class="re5">Repo</span><span class="sy1">.</span><span class="re3">all</span><span class="br0">(</span> 
+                <span class="re5">Ecto</span><span class="sy1">.</span><span class="re5">Query</span><span class="sy1">.</span><span class="re3">where</span><span class="br0">(</span><span class="re5">Pollutiondb</span><span class="sy1">.</span><span class="re5">Station</span><span class="sy1">,</span> name: ^name<span class="br0">)</span> <span class="br0">)</span></pre>
+    </div>
+    </li>
+    <li class="level1"><div class="li"> by makro <em>Ecto.Query.where</em> zadziałało poprawnie do nagłówków pliku dodaj:<pre class="code erlang"> require <span class="re5">Ecto</span><span class="sy1">.</span><span class="re5">Query</span></pre>
+    </div>
+    </li>
+    <li class="level1"><div class="li"> w module <em>Pollutiondb.Station</em> funkcję <em>findByLocation(lon, lat)</em> używając:<pre class="code erlang">     <span class="re5">Ecto</span><span class="sy1">.</span><span class="re5">Query</span><span class="sy1">.</span><span class="re3">from</span><span class="br0">(</span>s in <span class="re5">Pollutiondb</span><span class="sy1">.</span><span class="re5">Station</span><span class="sy1">,</span> 
+          whe<a href="http://erlang.org/doc/man/re.html"><span class="kw5">re</span></a>: <span class="me2">s</span><span class="sy1">.</span>lon <span class="sy3">==</span> ^lon<span class="sy1">,</span>
+          whe<a href="http://erlang.org/doc/man/re.html"><span class="kw5">re</span></a>: <span class="me2">s</span><span class="sy1">.</span>lat <span class="sy3">==</span> ^lat<span class="br0">)</span>
+          |<span class="sy3">&gt;</span> <span class="re5">Pollutiondb</span><span class="sy1">.</span><span class="re5">Repo</span><span class="sy1">.</span>all</pre>
+    </div>
+    </li>
+    <li class="level1"><div class="li"> w module <em>Pollutiondb.Station</em> dodaj funkcję <em>findByLocationRange(lonMin, lonMax, latMin, latMax)</em></div>
+    </li>
+    <li class="level1"><div class="li"> przetestuj wszystkie funkcje </div>
+    </li>
+    <li class="level1"><div class="li"> więcej szczegółów: <a href="https://hexdocs.pm/ecto/Ecto.Query.html" class="urlextern" title="https://hexdocs.pm/ecto/Ecto.Query.html" rel="ugc nofollow">https://hexdocs.pm/ecto/Ecto.Query.html</a></div>
+    </li>
+    </ol>
+    
+    <p>
+    <br>
+    
+    </p>
+    
+    </div>
+    
+    <h5 id="modyfikacja_danych">Modyfikacja danych</h5>
+    <div class="level5">
+    
+    <p>
+    <br>
+    
+    </p>
+    <ol>
+    <li class="level1"><div class="li"> modyfikacje wykonywane są przy pomocy tzw <em>changesets</em>; zdefiniuj w funkcji <em>updateName(station, newname)</em> w module <em>Pollutiondb.Station</em>:<pre class="code erlang">    station
+        |<span class="sy3">&gt;</span> <span class="re5">Ecto</span><span class="sy1">.</span><span class="re5">Changeset</span><span class="sy1">.</span><span class="re3">cast</span><span class="br0">(</span><span class="co1">%{name: newname}, [:name])</span>
+        |<span class="sy3">&gt;</span> <span class="re5">Ecto</span><span class="sy1">.</span><span class="re5">Changeset</span><span class="sy1">.</span><span class="re3">validate_required</span><span class="br0">(</span><span class="br0">[</span>:<span class="me2">name</span><span class="br0">]</span><span class="br0">)</span>
+        |<span class="sy3">&gt;</span> <span class="re5">Pollutiondb</span><span class="sy1">.</span><span class="re5">Repo</span><span class="sy1">.</span>update</pre>
+    </div>
+    </li>
+    <li class="level1"><div class="li"> więcej opcji walidacji danych: <a href="https://hexdocs.pm/ecto/Ecto.Changeset.html" class="urlextern" title="https://hexdocs.pm/ecto/Ecto.Changeset.html" rel="ugc nofollow">https://hexdocs.pm/ecto/Ecto.Changeset.html</a></div>
+    </li>
+    <li class="level1"><div class="li"> <em>changeset</em> może być też przekazany do <em>Pollutiondb.Repo.insert</em>; dodaj funkcję <em>add(name, lon, lat)</em>, która będzie sprawdzała czy wszystkie wartości są wypełnione i czy współrzędne mieszczą się w odpowiednich zakresach; potok zacznij od pustej struktury</div>
+    </li>
+    <li class="level1"><div class="li"> walidację przenieś do osobnej funkcji  <em>defp changeset(station, changesmap)</em>; użyj ją w <em>add</em> i w <em>updateName</em> </div>
+    </li>
+    </ol>
+    
+    <p>
+    <br>
+    
+    </p>
+    
+    </div>
+    
+    <h5 id="model_dla_relacji">Model dla relacji</h5>
+    <div class="level5">
+    
+    <p>
+    <br>
+    
+    </p>
+    <ol>
+    <li class="level1"><div class="li"> dodaj plik <em>reading.ex</em> w <em>lib/pollutiondb</em></div>
+    </li>
+    <li class="level1"><div class="li"> zdefiniuj w nim moduł <em>Pollutiondb.Reading</em>, a w nim <em>schma „readings”</em> zawierające datę, czas, typ i wartość (<a href="https://hexdocs.pm/ecto/Ecto.Schema.html#module-types-and-casting" class="urlextern" title="https://hexdocs.pm/ecto/Ecto.Schema.html#module-types-and-casting" rel="ugc nofollow">https://hexdocs.pm/ecto/Ecto.Schema.html#module-types-and-casting</a>)</div>
+    </li>
+    <li class="level1"><div class="li"> dodaj do schematu również pole relacji:<pre class="code erlang">       belongs_to :<span class="me2">station</span><span class="sy1">,</span> <span class="re5">Pollutiondb</span><span class="sy1">.</span><span class="re5">Station</span></pre>
+    </div>
+    </li>
+    <li class="level1"><div class="li"> w strukturze <em>Pollutiondb.Station</em> dodaj pole relacji:<pre class="code erlang">       has_many :<span class="me2">readings</span><span class="sy1">,</span> <span class="re5">Pollutiondb</span><span class="sy1">.</span><span class="re5">Reading</span></pre>
+    </div>
+    </li>
+    <li class="level1"><div class="li"> utwórz nową migrację, która będzie definiowała nową tabelę <em>:readings</em> zawierającą 4 odpowiednie pola oraz identyfikator dla relacji:<pre class="code erlang">       add :<span class="me2">station_id</span><span class="sy1">,</span> <span class="re3">references</span><span class="br0">(</span>:<span class="me2">stations</span><span class="sy1">,</span> on_delete: :<span class="me2">delete_all</span><span class="br0">)</span></pre>
+    </div>
+    </li>
+    <li class="level1"><div class="li"> uruchom migrację, zbuduj i uruchom projekt </div>
+    </li>
+    <li class="level1"><div class="li"> załaduj dane stacji pomiarowych - powinny zawierać informacje o pomiarach. </div>
+    </li>
+    </ol>
+    
+    <p>
+    <br>
+    
+    </p>
+    
+    </div>
+    
+    <h5 id="dane_w_relacji">Dane w relacji</h5>
+    <div class="level5">
+    
+    <p>
+    <br>
+    
+    </p>
+    <ol>
+    <li class="level1"><div class="li"> w module <em>Pollutiondb.Reading</em> dodaj funkcję <em>addNow(station, type, value)</em> używając:<pre class="code erlang">        <span class="sy1">...</span>
+            <span class="kw3">date</span>: <span class="re5">Date</span><span class="sy1">.</span>utc_today<span class="sy1">,</span>
+            <span class="kw3">time</span>: <span class="re5">Time</span><span class="sy1">.</span>utc_now<span class="sy1">,</span> 
+            <span class="sy1">...</span></pre>
+    </div>
+    </li>
+    <li class="level1 node"><div class="li"> dodaj kilka przykładowych wartości do kilku wybranych stacji </div>
+    <ol>
+    <li class="level2"><div class="li"> … popraw błąd zgodnie z sugestią … </div>
+    </li>
+    <li class="level2"><div class="li"> tworzone odczyty powinny zawierać relację do stacji  </div>
+    </li>
+    </ol>
+    </li>
+    <li class="level1"><div class="li"> w module <em>Pollutiondb.Reading</em> dodaj funkcję <em>findByDate(date)</em>; przetestuj jej działanie</div>
+    </li>
+    <li class="level1"><div class="li"> więcej szczegółów: <a href="https://hexdocs.pm/ecto/2.2.11/associations.html" class="urlextern" title="https://hexdocs.pm/ecto/2.2.11/associations.html" rel="ugc nofollow">https://hexdocs.pm/ecto/2.2.11/associations.html</a>, <a href="https://hexdocs.pm/ecto/associations.html" class="urlextern" title="https://hexdocs.pm/ecto/associations.html" rel="ugc nofollow">https://hexdocs.pm/ecto/associations.html</a></div>
+    </li>
+    </ol>
+    
+    <p>
+    <br>
+    
+    </p>
+    
+    </div>
+    
+    <h5 id="ladowanie_danych_z_pliku">Ładowanie danych z pliku</h5>
+    <div class="level5">
+    
+    <p>
+    <br>
+    
+    </p>
+    <ol>
+    <li class="level1"><div class="li"> wyczyść bazę, wywołując:<pre class="code erlang">         mix ecto<span class="sy1">.</span>drop
+             mix ecto<span class="sy1">.</span>create
+             mix ecto<span class="sy1">.</span>migrate</pre>
+    </div>
+    </li>
+    <li class="level1"><div class="li"> w module <em>Pollutiondb.Reading</em> dodaj funkcję <em>add(station, date, time, type, value)</em></div>
+    </li>
+    <li class="level1"><div class="li"> dodaj do projektu moduł ładujący dane z poprzednich zajęć oraz plik z danymi</div>
+    </li>
+    <li class="level1"><div class="li"> zmodyfikuj moduł tak, by używał funkcji <em>Pollution.Station.add/3</em> oraz <em>Pollutiondb.Reading.add/5</em></div>
+    </li>
+    <li class="level1"><div class="li"> załaduj dane. </div>
+    </li>
+    </ol>
+    
+    <p>
+    <br>
+    
+    </p>
+    
+    </div>
+    
+    <h4 id="zadanie_domowe">Zadanie domowe</h4>
+    <div class="level4">
+    <ul>
+    <li class="level1"><div class="li"> dokończ zadania z zajęć </div>
+    </li>
+    <li class="level1"><div class="li"> zabezpiecz zbudowaną aplikację, przygotuj ją na następne laboratorium </div>
+    </li>
+    </ul>
+    
+    </div>
+    
+        
+        
+                <div class="meta">
+                  <div class="user">
+                  Zalogowany jako: <bdi>Student </bdi> (<bdi>erlang</bdi>)			  </div>
+                  <div class="doc">
+                  <bdi>student/erlang/elab6-2023.txt</bdi> · ostatnio zmienione: 2023/06/13 16:13 przez <bdi>wtur</bdi>			  </div>
+                </div>
+        
+        </div>
