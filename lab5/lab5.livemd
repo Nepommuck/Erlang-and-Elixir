@@ -1,0 +1,129 @@
+# Elixir lab 1
+
+## Parsing
+
+```elixir
+defmodule Parser do
+  def parseLine(raw_line) do
+    [date, time, location1, location2, pollution_level] = String.split(raw_line, ",")
+
+    %{
+      :datetime => {date |> parseDate, time |> parseTime},
+      :location => {location1 |> String.to_float(), location2 |> String.to_float()},
+      :pollutionLevel => pollution_level |> String.to_integer()
+    }
+  end
+
+  def identifyStations(data) do
+    data
+    |> Enum.map(fn record -> record.location end)
+    |> Enum.uniq_by(fn x -> x end)
+  end
+
+  defp parseDate(date) do
+    [day, month, year] = date |> String.split("-")
+
+    [year, month, day]
+    |> Enum.map(fn x -> x |> String.to_integer() end)
+    |> List.to_tuple()
+  end
+
+  defp parseTime(time) do
+    [hour, minutes] = time |> String.split(":")
+
+    [hour, minutes, "00"]
+    |> Enum.map(fn x -> x |> String.to_integer() end)
+    |> List.to_tuple()
+  end
+end
+```
+
+```elixir
+raw_lines =
+  "C:\\Users\\pawel\\Downloads\\pollution.csv"
+  |> File.read!()
+  |> String.split("\r\n")
+
+data =
+  for line <- raw_lines do
+    line |> Parser.parseLine()
+  end
+
+stations = Parser.identifyStations(data)
+
+"Number of stations: #{stations |> length |> Integer.to_string()}"
+```
+
+## Using Erlang Pollution module
+
+Empty Monitor
+
+```elixir
+Code.append_path(
+  "C:\\Users\\pawel\\rebar3\\pollution_server\\" <>
+    "_build\\default\\lib\\pollution_server\\ebin"
+)
+
+Application.stop(:pollution_server)
+Application.start(:pollution_server)
+
+:pollution_gen_server.get()
+```
+
+```elixir
+insert_stations = fn ->
+  for station_location <- stations do
+    :pollution_gen_server.add_station(station_location, station_location)
+  end
+end
+
+insert_data = fn ->
+  for record <- data do
+    :pollution_gen_server.add_value(
+      record.location,
+      record.datetime,
+      "PM10",
+      record.pollutionLevel
+    )
+  end
+end
+```
+
+```elixir
+defmodule Timer do
+  def get_time_in_sec_and_result(function) do
+    {time_micro_s, result} = function |> :timer.tc()
+    {time_micro_s * 10 ** -6, result}
+  end
+
+  def measure_time_in_sec(function) do
+    function |> get_time_in_sec_and_result |> elem(0)
+  end
+end
+```
+
+```elixir
+insert_stations |> Timer.measure_time_in_sec()
+```
+
+```elixir
+insert_data |> Timer.measure_time_in_sec()
+```
+
+```elixir
+:pollution_gen_server.get()
+```
+
+```elixir
+fn ->
+  :pollution_gen_server.get_station_mean({20.06, 49.986}, "PM10")
+end
+|> Timer.get_time_in_sec_and_result()
+```
+
+```elixir
+fn ->
+  :pollution_gen_server.get_daily_mean({2017, 5, 3}, "PM10")
+end
+|> Timer.get_time_in_sec_and_result()
+```
