@@ -51,30 +51,27 @@ Tą część wykonujemy w IntelliJ
 Celem tego ćwiczenia będzie zaimplementowanie algorytmu quicksort. W module `qsort` utwórz następujące funkcje:
 
 1. Funkcja 1, która dla listy i zadanego argumentu wybierze te elementy które są mniejsze od argumentu. Wykorzystaj list comprehensions.
-```
-less_than(List, Arg) -> ... 
-```
-
+    ```
+    less_than(List, Arg) -> ... 
+    ```
 2. Funkcja `grt_eq_than/2`, która dla listy i zadanego argumentu wybierze te elementy które są większe bądź równe od argumentu. Tutaj też wykorzystaj list comprehensions.
-```
-grt_eq_than(List, Arg) -> ... 
-```
-
+    ```
+    grt_eq_than(List, Arg) -> ... 
+    ```
 3. Funkcja qs/1 implementująca algorytm quicksort:
-
+    ```
     qs([Pivot|Tail]) -> qs( less_than(Tail,Pivot) ) ++ [Pivot] ++ qs( grt_eq_than(Tail,Pivot) ) 
-
+    ```
 Mając zaimplementowanego quicksorta, dobrze byłoby sprawdzić jego działanie. W tym celu zaimplementuj funkcje pomocnicze ułatwiające testowanie.
 
 1. Funkcja `random_elems/3`, która zwróci listę losowych elementów z zakresu [Min,Max] o rozmiarze N. Wykorzystaj list comprehensions oraz `rand:uniform/1` i `lists:seq/2`.
-```
-random_elems(N,Min,Max)-> ... 
-```
-
+    ```
+    random_elems(N,Min,Max)-> ... 
+    ```
 2. Funkcja `compare_speeds/3` która porówna prędkości działania podanych algorytmów sortujących dla zadanej listy. Dwa ostatnie parametry to funkcje. Wykorzystaj do tego funkcję `timer:tc`
-```
-compare_speeds(List, Fun1, Fun2) -> ... 
-```
+    ```
+    compare_speeds(List, Fun1, Fun2) -> ... 
+    ```
 
 Interesujące nas dane wypisz na standardowe wyjście, formatując je funkcją `io:format/2`.
 
